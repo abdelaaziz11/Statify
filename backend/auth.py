@@ -2,11 +2,7 @@ from flask_restx import Api, Resource, Namespace, fields
 from models import User
 from flask_jwt_extended import (JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity)
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask import Flask, request, jsonify, make_response
-from flask_cors import CORS
-
-app = Flask(__name__)
-CORS(app)
+from flask import request, jsonify, make_response
 
 auth_ns = Namespace('auth', description="A namespace for our Authentication")
 
@@ -42,7 +38,7 @@ class SignUp(Resource):
         new_user = User(
             username=data.get('username'),
             email=data.get('email'),
-            password=generate_password_hash(data.get('password'))
+            password=generate_password_hash(data.get('password'), method='pbkdf2:sha256')
         )
         
         new_user.save()

@@ -12,12 +12,13 @@ def create_app(config):
     app = Flask(__name__)
     app.config.from_object(config)
 
-    CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})  # configure our API to work with an app located on a different port
-    
     db.init_app(app)
 
     migrate = Migrate(app, db)
     JWTManager(app)
+
+    # CORS must be initialized BEFORE Api so preflight OPTIONS requests get headers
+    CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
 
     api = Api(app, doc='/docs')
     
