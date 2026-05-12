@@ -1,5 +1,4 @@
-import React,{useEffect,useState} from 'react';
-import './Main.css';
+import React, { useEffect, useState } from 'react';
 import Navbar from '../Navbar/Navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Link } from 'react-router-dom';
@@ -9,15 +8,30 @@ import linkedin from '../../Assests/linkedin.png';
 import aboutimage from '../../Assests/images (3).jpeg';
 import twitter from '../../Assests/x.png';
 import videobg from '../../Assests/videobg.mp4';
-import teamMember1 from '../../Assests/images (3).jpeg'; // Replace with your actual image path
-import teamMember2 from '../../Assests/images (3).jpeg'; // Replace with your actual image path
-import teamMember3 from '../../Assests/images (3).jpeg'; // Replace with your actual image path
-import teamMember4 from '../../Assests/images (3).jpeg'; // Replace with your actual image path
+import teamMember1 from '../../Assests/images (3).jpeg';
+import teamMember2 from '../../Assests/images (3).jpeg';
+import teamMember3 from '../../Assests/images (3).jpeg';
+import teamMember4 from '../../Assests/images (3).jpeg';
 import { useAuth } from '../../auth';
 import Recipe from '../Recipe';
-import{useForm} from 'react-hook-form'
-import {Modal,Form,Button} from 'react-bootstrap'
+import { useForm } from 'react-hook-form'
+import { Modal, Form, Button } from 'react-bootstrap'
 
+const formFields = [
+  { id: 'full_name', label: 'Full Name', type: 'text', placeholder: 'Enter full name', validation: { required: true, maxLength: 25 }, errorMsg: 'Full Name is required', errorMax: 'Max 25 chars' },
+  { id: 'cin', label: 'CIN', type: 'text', placeholder: 'Enter CIN', validation: { required: true }, errorMsg: 'CIN is required' },
+  { id: 'phone_number', label: 'Phone Number', type: 'text', placeholder: 'Enter phone number', validation: { required: true }, errorMsg: 'Phone is required' },
+  { id: 'email', label: 'Email', type: 'email', placeholder: 'Enter email', validation: { required: true }, errorMsg: 'Email is required' },
+  { id: 'age', label: 'Age', type: 'number', placeholder: 'Enter age', validation: { required: true }, errorMsg: 'Age is required' },
+  { id: 'gender', label: 'Gender', type: 'text', placeholder: 'Enter gender', validation: { required: true }, errorMsg: 'Gender is required' },
+  { id: 'state', label: 'State', type: 'text', placeholder: 'Enter state', validation: { required: true }, errorMsg: 'State is required' },
+  { id: 'city', label: 'City', type: 'text', placeholder: 'Enter city', validation: { required: true }, errorMsg: 'City is required' },
+  { id: 'address', label: 'Address', type: 'text', placeholder: 'Enter address', validation: { required: true }, errorMsg: 'Address is required' },
+  { id: 'marital_status', label: 'Marital Status', type: 'text', placeholder: 'Enter marital status', validation: { required: true }, errorMsg: 'Marital Status required' },
+  { id: 'nbr_of_children', label: 'Children', type: 'number', placeholder: 'Enter number of children', validation: {} },
+  { id: 'occupation', label: 'Occupation', type: 'text', placeholder: 'Enter occupation', validation: { required: true }, errorMsg: 'Occupation required' },
+  { id: 'salary', label: 'Salary', type: 'number', placeholder: 'Enter salary', step: '0.01', validation: { required: true }, errorMsg: 'Salary is required' },
+];
 
 const LoggedInHome = () => {
   const [recipes, setRecipes] = useState([]);
@@ -26,55 +40,33 @@ const LoggedInHome = () => {
   const [recipeId, setRecipeId] = useState(0);
 
   useEffect(() => {
-    fetch('http://localhost:5000/recipe/recipes')
+    fetch('http://localhost:5001/recipe/recipes')
       .then(res => res.json())
-      .then(data => {
-        console.log(data);
-        setRecipes(data);
-      })
+      .then(data => setRecipes(data))
       .catch(err => console.log(err));
   }, []);
 
   const getAllRecipes = () => {
-    fetch('http://localhost:5000/recipe/recipes')
+    fetch('http://localhost:5001/recipe/recipes')
       .then(res => res.json())
-      .then(data => {
-        setRecipes(data);
-      })
+      .then(data => setRecipes(data))
       .catch(err => console.log(err));
   };
 
-  const closeModal = () => {
-    setShow(false);
-  };
+  const closeModal = () => setShow(false);
 
   const showModal = (id) => {
     setShow(true);
     setRecipeId(id);
-
     recipes.forEach((recipe) => {
       if (recipe.id === id) {
-        setValue('full_name', recipe.full_name);
-        setValue('cin', recipe.cin);
-        setValue('phone_number', recipe.phone_number);
-        setValue('email', recipe.email);
-        setValue('age', recipe.age);
-        setValue('gender', recipe.gender);
-        setValue('state', recipe.state);
-        setValue('city', recipe.city);
-        setValue('address', recipe.address);
-        setValue('marital_status', recipe.marital_status);
-        setValue('nbr_of_children', recipe.nbr_of_children);
-        setValue('occupation', recipe.occupation);
-        setValue('salary', recipe.salary);
+        Object.keys(recipe).forEach(key => setValue(key, recipe[key]));
       }
     });
   };
 
   const updateRecipe = (data) => {
     let token = localStorage.getItem('REACT_TOKEN_AUTH_KEY');
-    console.log(data);
-
     const requestOptions = {
       method: 'PUT',
       headers: {
@@ -84,20 +76,16 @@ const LoggedInHome = () => {
       body: JSON.stringify(data)
     };
 
-    fetch(`/recipe/recipe/${recipeId}`, requestOptions)
+    fetch(`http://localhost:5001/recipe/recipe/${recipeId}`, requestOptions)
       .then(res => res.json())
-      .then(data => {
-        console.log(data);
-       const reload = window.location.reload();
-       reload()
+      .then(() => {
+        window.location.reload();
       })
       .catch(err => console.log(err));
   };
 
   const deleteRecipe = (id) => {
     let token = localStorage.getItem('REACT_TOKEN_AUTH_KEY');
-    console.log(id);
-
     const requestOptions = {
       method: 'DELETE',
       headers: {
@@ -105,480 +93,214 @@ const LoggedInHome = () => {
         'Authorization': `Bearer ${JSON.parse(token)}`
       }
     };
-
-    fetch(`http://localhost:5000/recipe/recipe/${id}`, requestOptions)
+    fetch(`http://localhost:5001/recipe/recipe/${id}`, requestOptions)
       .then(res => res.json())
-      .then(data => {
-        console.log(data);
-        getAllRecipes();
-      })
+      .then(() => getAllRecipes())
       .catch(err => console.log(err));
   };
 
   return (
     <>
-      <Navbar/>
-      <div className="recipe">
-      <Modal show={show} size="lg" onHide={closeModal}>
-          <Modal.Header closeButton>
-            <Modal.Title>Update Form</Modal.Title>
+      <Navbar />
+      <div className="pt-[100px] pb-16 px-6 md:px-12 bg-gradient-to-b from-[#0b0f19] to-[#131b2f] min-h-screen relative overflow-hidden">
+        {/* Background ambient light */}
+        <div className="absolute top-[10%] left-[50%] -translate-x-[50%] w-[800px] h-[800px] bg-sky-600/10 blur-[150px] rounded-full z-0 pointer-events-none"></div>
+
+        <Modal show={show} size="lg" onHide={closeModal} centered contentClassName="!bg-[#131b2f] backdrop-blur-xl !border border-emerald-500/30 rounded-[2rem] shadow-[0_0_40px_rgba(16,185,129,0.2)] overflow-hidden">
+          <Modal.Header closeButton closeVariant="white" className="border-b border-white/10 px-8 py-5 !bg-[#131b2f]">
+            <Modal.Title className="text-3xl font-heading font-extrabold text-white">UPDATE FORM</Modal.Title>
           </Modal.Header>
-          <Modal.Body>
-            <form >
-                {/* Full Name */}
-                <div className="form-group">
-                  <label htmlFor="full_name">Full Name</label>
+          <Modal.Body className="p-8 !bg-[#131b2f]">
+            <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {formFields.map((field) => (
+                <div key={field.id} className={`flex flex-col gap-1.5 ${field.id === 'address' ? 'md:col-span-2' : ''}`}>
+                  <label htmlFor={field.id} className="text-sm font-semibold text-slate-400 ml-1">
+                    {field.label} {field.validation?.required && <span className="text-emerald-400">*</span>}
+                  </label>
                   <input
-                    type="text"
-                    className="form-control"
-                    id="full_name"
-                    placeholder="Enter full name"
-                    {...register('full_name', { required: true, maxLength: 25 })} // kanverifyo wach l'input makhod
+                    type={field.type}
+                    step={field.step}
+                    id={field.id}
+                    placeholder={field.placeholder}
+                    className={`w-full !bg-white/5 !border !text-slate-50 p-3.5 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/20 transition-all duration-300 placeholder:text-slate-500/60
+                      ${errors[field.id] ? '!border-red-500/50 hover:!border-red-500' : '!border-white/10 hover:!border-emerald-500/50 focus:!border-emerald-500'}
+                    `}
+                    {...register(field.id, field.validation)}
                   />
-                  {/* Afficher les erreurs */}
-                  {errors.full_name && <small style={{ color: 'red' }}>Full Name is required</small>}
-                  {errors.full_name?.type === 'maxLength' && (
-                    <small style={{ color: 'red' }}>Full Name should be less than 25 characters</small>
-                  )}
+                  {errors[field.id]?.type === 'required' && <small className="text-red-400 font-medium ml-1">{field.errorMsg}</small>}
+                  {errors[field.id]?.type === 'maxLength' && <small className="text-red-400 font-medium ml-1">{field.errorMax}</small>}
                 </div>
-      
-                {/* CIN */}
-                <div className="form-group">
-                  <label htmlFor="cin">CIN</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="cin"
-                    placeholder="Enter CIN"
-                    {...register('cin', { required: true })} // CIN khass ykoun required
-                  />
-                  {errors.cin && <small style={{ color: 'red' }}>CIN is required</small>}
-                </div>
-      
-                {/* Phone Number */}
-                <div className="form-group">
-                  <label htmlFor="phone_number">Phone Number</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="phone_number"
-                    placeholder="Enter phone number"
-                    {...register('phone_number', { required: true })} // Phone number khass ykoun valid
-                  />
-                  {errors.phone_number && <small style={{ color: 'red' }}>Phone Number is required</small>}
-                </div>
-      
-                {/* Email */}
-                <div className="form-group">
-                  <label htmlFor="email">Email</label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    id="email"
-                    placeholder="Enter email"
-                    {...register('email', { required: true })} // email khass ykoun required
-                  />
-                  {errors.email && <small style={{ color: 'red' }}>Email is required</small>}
-                </div>
-      
-                {/* Age */}
-                <div className="form-group">
-                  <label htmlFor="age">Age</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    id="age"
-                    placeholder="Enter age"
-                    {...register('age', { required: true })} // Age khass ykoun valid o required
-                  />
-                  {errors.age && <small style={{ color: 'red' }}>Age is required</small>}
-                </div>
-      
-                {/* Gender */}
-                <div className="form-group">
-                  <label htmlFor="gender">Gender</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="gender"
-                    placeholder="Enter gender"
-                    {...register('gender', { required: true })} // Gender khass ykoun valid
-                  />
-                  {errors.gender && <small style={{ color: 'red' }}>Gender is required</small>}
-                </div>
-      
-                {/* State */}
-                <div className="form-group">
-                  <label htmlFor="state">State</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="state"
-                    placeholder="Enter state"
-                    {...register('state', { required: true })} // State khass ykoun obligatoire
-                  />
-                  {errors.state && <small style={{ color: 'red' }}>State is required</small>}
-                </div>
-      
-                {/* City */}
-                <div className="form-group">
-                  <label htmlFor="city">City</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="city"
-                    placeholder="Enter city"
-                    {...register('city', { required: true })} // City khass ykoun
-                  />
-                  {errors.city && <small style={{ color: 'red' }}>City is required</small>}
-                </div>
-      
-                {/* Address */}
-                <div className="form-group">
-                  <label htmlFor="address">Address</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="address"
-                    placeholder="Enter address"
-                    {...register('address', { required: true })} // Address khass ykoun
-                  />
-                  {errors.address && <small style={{ color: 'red' }}>Address is required</small>}
-                </div>
-      
-                {/* Marital Status */}
-                <div className="form-group">
-                  <label htmlFor="marital_status">Marital Status</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="marital_status"
-                    placeholder="Enter marital status"
-                    {...register('marital_status', { required: true })} // marital status required
-                  />
-                  {errors.marital_status && <small style={{ color: 'red' }}>Marital Status is required</small>}
-                </div>
-      
-                {/* Number of Children */}
-                <div className="form-group">
-                  <label htmlFor="nbr_of_children">Number of Children</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    id="nbr_of_children"
-                    placeholder="Enter number of children"
-                    {...register('nbr_of_children')} // Children field khass ykoun optional
-                  />
-                </div>
-      
-                {/* Occupation */}
-                <div className="form-group">
-                  <label htmlFor="occupation">Occupation</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="occupation"
-                    placeholder="Enter occupation"
-                    {...register('occupation', { required: true })} // Occupation required
-                  />
-                  {errors.occupation && <small style={{ color: 'red' }}>Occupation is required</small>}
-                </div>
-      
-                {/* Salary */}
-                <div className="form-group">
-                  <label htmlFor="salary">Salary</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    className="form-control"
-                    id="salary"
-                    placeholder="Enter salary"
-                    {...register('salary', { required: true })} // Salary required
-                  />
-                  {errors.salary && <small style={{ color: 'red' }}>Salary is required</small>}
-                </div>
-      
-                {/* Button to submit form */}
-                <button type="submit" className="btn btn-primary" onClick={handleSubmit(updateRecipe)}>
-                  Submit
+              ))}
+              <div className="md:col-span-2 mt-4 flex gap-4">
+                <button type="button" onClick={closeModal} className="flex-1 py-4 rounded-xl bg-white/5 border border-white/10 text-slate-300 font-semibold hover:bg-white/10 transition-all duration-300">
+                  Cancel
                 </button>
-              </form>
-
-
+                <button type="button" onClick={handleSubmit(updateRecipe)} className="flex-1 py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold tracking-wide shadow-[0_8px_20px_rgba(16,185,129,0.3)] hover:-translate-y-1 hover:shadow-[0_15px_30px_rgba(16,185,129,0.5)] transition-all duration-300">
+                  Update Form
+                </button>
+              </div>
+            </form>
           </Modal.Body>
         </Modal>
-        <h1>List of Your Forms</h1>
-        {
-          recipes.map((recipe) => (
-            <Recipe
-              key={recipe.id}
-              full_name={recipe.full_name}
-              cin={recipe.cin}
-              phone_number={recipe.phone_number}
-              email={recipe.email}
-              age={recipe.age}
-              gender={recipe.gender}
-              state={recipe.state}
-              city={recipe.city}
-              address={recipe.address}
-              marital_status={recipe.marital_status}
-              nbr_of_children={recipe.nbr_of_children}
-              occupation={recipe.occupation}
-              salary={recipe.salary}
-              onClick={() => { showModal(recipe.id); }}
-              onDelete={() => { deleteRecipe(recipe.id); }}
-            />
-          ))
-        }
-        <br></br>
-      </div>
-      
+
+        <div className="relative z-10 max-w-7xl mx-auto">
+          <div className="flex flex-col items-center mb-16 mt-6">
+            <h1 className="text-4xl md:text-5xl font-heading font-extrabold text-transparent bg-gradient-to-r from-indigo-400 to-sky-400 bg-clip-text mb-4 text-center">
+              SUBMITTED FORMS
+            </h1>
+            <p className="text-slate-400 text-lg font-medium text-center max-w-2xl">
+              Manage your submitted census data records directly. Update details or remove entries that are no longer accurate.
+            </p>
+          </div>
+
+          {recipes.length > 0 ? (
+            <div className="grid grid-cols-1 gap-6 pb-12">
+              {recipes.map((recipe) => (
+                <div key={recipe.id} className="transform transition-all duration-300 hover:-translate-y-1">
+                  <Recipe {...recipe} onClick={() => showModal(recipe.id)} onDelete={() => deleteRecipe(recipe.id)} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center p-16 bg-white/5 border border-white/10 rounded-[2rem] backdrop-blur-md">
+              <div className="h-24 w-24 rounded-full bg-indigo-500/20 flex items-center justify-center mb-6">
+                <svg className="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+              </div>
+              <h3 className="text-xl font-heading font-bold text-slate-200 mb-2">No Records Found</h3>
+              <p className="text-slate-400 text-center mb-0">You haven't submitted any census forms yet.</p>
+              <Link to="/createform" className="mt-6 px-8 py-3 rounded-full bg-gradient-to-r from-indigo-500 to-sky-500 text-white font-semibold shadow-[0_5px_15px_rgba(99,102,241,0.3)] hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(99,102,241,0.5)] transition-all">
+                Create New Form
+              </Link>
+            </div>
+          )}
+        </div>
+      </div >
     </>
   );
 };
 
-
-
-const LoggedOutHome =()=>{
-  return(
+const LoggedOutHome = () => {
+  return (
     <>
-              {/* HERO SECTION */}
-          <section className="hero-section">
-          <video src={videobg} autoPlay loop muted className="video-bg" />
-          <div className="hero">
-            <Link to="/login">
-              <button className="btn-hero">Get Started</button>
-            </Link>
-          </div>
-        </section>
+      {/* HERO SECTION */}
+      <section className="relative h-screen flex justify-center items-center overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0b0f19]/40 to-[#0b0f19] z-10" />
+        <video src={videobg} autoPlay loop muted className="absolute inset-0 w-full h-full object-cover z-0 opacity-60" />
+        <div className="relative z-20 flex flex-col items-center text-center max-w-4xl px-5 -mt-12">
+          <h1 className="text-[clamp(3rem,8vw,6.5rem)] font-heading font-bold bg-gradient-to-r from-indigo-400 to-sky-400 text-transparent bg-clip-text mt-5 mb-6 leading-tight drop-shadow-2xl">
+            Empowering Morocco Through Data
+          </h1>
+          <p className="text-xl text-slate-300 mb-10 max-w-2xl leading-relaxed">
+            Statify transforms national statistical reporting by putting precision, performance, and transparency first.
+          </p>
+          <Link to="/login">
+            <button className="text-lg font-semibold px-10 py-4 rounded-full bg-gradient-to-r from-indigo-500 to-sky-500 text-white shadow-[0_10px_25px_rgba(79,70,229,0.4)] hover:-translate-y-1 hover:shadow-[0_15px_35px_rgba(79,70,229,0.6)] transition-all duration-300">
+              Get Started
+            </button>
+          </Link>
+        </div>
+      </section>
 
-        {/* ABOUT SECTION */}
-        <section className="about-section" id="about">
-          <div className="about">
-            <h1 className="heading text-uppercase">About Us</h1>
-            <span className="text-black-50">Statify is a Morocco statistics online</span>
-            <div className="about-content">
-              <div className="about-image">
-                <img src={aboutimage} alt="about-image" />
-              </div>
-              <div className="about-info">
-                <p>Statify is a groundbreaking platform designed to transform the way Morocco conducts its national census. Our mission is to streamline the data collection process by empowering citizens to participate directly. We believe that by modernizing this vital task, we can improve the accuracy, efficiency, and cost-effectiveness of large-scale statistical reporting. At Statify, we’re committed to innovation that benefits both the government and the people. Our platform enables individuals to easily input their own information, eliminating the need for traditional data collectors and saving valuable time and resources. Join us in building a smarter, more connected Morocco, where every voice matters, and every data point contributes to a brighter future.</p>
-              </div>
+      {/* ABOUT SECTION */}
+      <section className="py-24 px-5 min-h-[80vh] flex justify-center items-center bg-[#0b0f19]" id="about">
+        <div className="max-w-5xl w-full">
+          <div className="text-center mb-16 relative">
+            <h1 className="text-4xl font-heading font-bold text-slate-50 uppercase mb-3">About Us</h1>
+            <span className="text-slate-400 text-lg">Statify is a Morocco statistics online platform</span>
+            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-16 h-1 bg-brand rounded-full"></div>
+          </div>
+          <div className="flex flex-col lg:flex-row gap-12 items-center bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 lg:p-12 shadow-2xl group">
+            <div className="w-full lg:w-1/3">
+              <img src={aboutimage} alt="about" className="w-full h-[280px] object-cover rounded-2xl shadow-2xl transition-transform duration-500 group-hover:scale-105" />
+            </div>
+            <div className="w-full lg:w-2/3">
+              <p className="text-slate-300 text-lg leading-relaxed text-justify lg:text-left">
+                Statify is a groundbreaking platform designed to transform the way Morocco conducts its national census. Our mission is to streamline the data collection process by empowering citizens to participate directly. We believe that by modernizing this vital task, we can improve the accuracy, efficiency, and cost-effectiveness of large-scale statistical reporting. At Statify, we're committed to innovation that benefits both the government and the people. Our platform enables individuals to easily input their own information, eliminating the need for traditional data collectors and saving valuable time and resources. Join us in building a smarter, more connected Morocco, where every voice matters, and every data point contributes to a brighter future.
+              </p>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* TEAM MEMBERS SECTION */}
-        <section className="team-section" id="team">
-          <h1 className="title text-uppercase">Our Team</h1>
-          
-          <Carousel interval={5000} pause={false} controls={true}>
-            <Carousel.Item>
-              <img
-                className="d-block"
-                src={teamMember1}
-                alt="First team member"
-              />
-              <Carousel.Caption>
-              <h1>Mounim Nadir</h1>
-                <h3>Fullstack & Specialise in The Frontend </h3>
-                <h4>DevOps</h4>
+      {/* TEAM SECTION */}
+      <section className="py-24 px-5 bg-[#131b2f]" id="team">
+        <div className="text-center mb-16 relative">
+          <h1 className="text-4xl font-heading font-bold text-slate-50 uppercase mb-3">Team Members</h1>
+          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-16 h-1 bg-brand rounded-full"></div>
+        </div>
 
-                
-                
-              </Carousel.Caption>
+        <Carousel interval={5000} pause={false} controls={true} className="max-w-3xl mx-auto pb-12">
+          {[
+            { img: teamMember1, name: "Mounim Nadir", role: "Fullstack & Specialise in The Frontend", subrole: "DevOps" },
+            { img: teamMember2, name: "Abdelaaziz Khouda", role: "Fullstack & Specialise in the Frontend", subrole: "Database" },
+            { img: teamMember3, name: "Mohamed El Bouhmi", role: "Fullstack & Specialise in the Backend", subrole: "DevOps" },
+            { img: teamMember4, name: "Hamid Bouayadi", role: "Fullstack & Specialise in the Backend", subrole: "DevOps" }
+          ].map((member, index) => (
+            <Carousel.Item key={index}>
+              <div className="flex flex-col items-center pt-16 pb-8 px-4">
+                {/* Avatar overlapping the card */}
+                <div className="relative z-10 mb-[-80px]">
+                  <img
+                    className="rounded-full h-[160px] w-[160px] object-cover border-4 border-[#1e293b] shadow-[0_0_40px_rgba(99,102,241,0.15)] transition-all duration-500 hover:border-brand hover:scale-105"
+                    src={member.img}
+                    alt={member.name}
+                  />
+                </div>
+                {/* Info card */}
+                <div className="bg-white/[0.04] backdrop-blur-lg border border-white/10 rounded-2xl pt-24 pb-8 px-10 text-center max-w-[500px] w-full shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+                  <h2 className="text-2xl font-bold font-heading text-slate-50 mb-2">{member.name}</h2>
+                  <p className="text-brand text-base font-medium mb-1">{member.role}</p>
+                  <p className="text-slate-400 text-xs uppercase tracking-[0.2em] font-semibold">{member.subrole}</p>
+                </div>
+              </div>
             </Carousel.Item>
-            <Carousel.Item>
-              <img
-                className="d-block"
-                src={teamMember2}
-                alt="Second team member"
-              />
-              <Carousel.Caption>
-              <h1>Abdelaaziz Khouda</h1>
-                <h3>Frontend Engineer  </h3>
-                <h4>Database</h4>
-                
-            </Carousel.Caption>
-            </Carousel.Item>
-            <Carousel.Item>
-              <img
-                className="d-block"
-                src={teamMember3}
-                alt="Third team member"
-              />
-              <Carousel.Caption>
-              <h1>Mohamed El Bouhmi</h1>
-                <h3>Fullstack & Specialise in the Backend </h3>
-                <h4>DevOps</h4>
+          ))}
+        </Carousel>
+      </section>
 
-                
-              </Carousel.Caption>
-            </Carousel.Item>
-            <Carousel.Item>
-              <img
-                className="d-block"
-                src={teamMember4}
-                alt="Fourth team member"
-              />
-              <Carousel.Caption>
-              <h1>Hamid Bouayadi</h1>
-                <h3>fullstack & specialise in the Backend </h3>
-                <h4>DevOps</h4>
+      {/* CONTACT SECTION */}
+      <section className="py-24 px-5 bg-[#0b0f19]" id="contact">
+        <div className="text-center mb-16 relative">
+          <h1 className="text-4xl font-heading font-bold text-slate-50 uppercase mb-3">Team Socials</h1>
+          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-16 h-1 bg-brand rounded-full"></div>
+        </div>
 
-              
-              </Carousel.Caption>
-            </Carousel.Item>
-          </Carousel>
-        </section>
-
-
-        {/* CONTACT SECTION  1*/}
-
-        <h1 className="title text-uppercase">Team socials</h1>
-        <section className="contact-section" id="contact">
-          <div className="contact">
-            <h1 className="title-sub text-uppercase">Mounim's socials</h1>
-            <p className="text-black-50">Get in Touch</p>
-            <div className="contact-info-upper-container">
-              <div className="contact-info-container">
-                <img
-                  src={email}
-                  alt="Email icon"
-                  className="icon contact-icon email-icon"
-                />
-                <p><a href="mailto:mounimnadir7@gmail.com">Gmail</a></p>
+        {[
+          { name: "Mounim's", email: "mounimnadir7@gmail.com", linkedin: "mounim-nadir-b6575b27a", twitter: "MounimNadir" },
+          { name: "Abdelaziz's", email: "abdelkhouda055@gmail.com", linkedin: "abdel-khouda-502b03253", twitter: "AbdelKhouda" },
+          { name: "Mohammed's", email: "Bouayadihamid@gmail.com", linkedin: "mounim-nadir-b6575b27a", twitter: "AbdelKhouda" },
+          { name: "Hamid's", email: "Bouayadihamid@gmail.com", linkedin: "hamid-bouayadi", twitter: "HamidBouayadi" }
+        ].map((contact, index) => (
+          <div key={index} className="flex flex-col items-center mb-12 last:mb-0">
+            <h1 className="text-2xl font-heading font-bold text-slate-200 uppercase mb-2">{contact.name}</h1>
+            <p className="text-slate-400 mb-6 font-medium">Get in Touch</p>
+            <div className="flex flex-col sm:flex-row justify-center gap-6 sm:gap-10 bg-white/5 border border-white/10 backdrop-blur-md rounded-full px-8 sm:px-12 py-4 shadow-xl">
+              <div className="flex items-center gap-3">
+                <img src={email} alt="Email icon" className="h-[28px] w-[28px] object-contain transition-transform hover:scale-110 drop-shadow-[0_0_5px_rgba(255,255,255,0.2)]" />
+                <a href={`mailto:${contact.email}`} className="text-slate-300 hover:text-brand font-medium transition-colors">Gmail</a>
               </div>
-              <div className="contact-info-container">
-                <img
-                  src={linkedin}
-                  alt="LinkedIn icon"
-                  className="icon contact-icon"
-                />
-                <p><a href="https://www.linkedin.com/in/mounim-nadir-b6575b27a">LinkedIn</a></p>
+              <div className="flex items-center gap-3">
+                <img src={linkedin} alt="LinkedIn icon" className="h-[28px] w-[28px] object-contain transition-transform hover:scale-110 drop-shadow-[0_0_5px_rgba(255,255,255,0.2)]" />
+                <a href={`https://www.linkedin.com/in/${contact.linkedin}`} className="text-slate-300 hover:text-brand font-medium transition-colors">LinkedIn</a>
               </div>
-              <div className="contact-info-container">
-                <img
-                  src={twitter}
-                  alt="Twitter icon"
-                  className="icon contact-icon"
-                />
-                <p><a href="https://x.com/MounimNadir">X-Twitter</a></p>
+              <div className="flex items-center gap-3">
+                <img src={twitter} alt="Twitter icon" className="h-[28px] w-[28px] object-contain transition-transform hover:scale-110 drop-shadow-[0_0_5px_rgba(255,255,255,0.2)]" />
+                <a href={`https://x.com/${contact.twitter}`} className="text-slate-300 hover:text-brand font-medium transition-colors">X-Twitter</a>
               </div>
             </div>
           </div>
-        </section>
-    {/* CONTACT SECTION  2*/}
-        <section className="contact-section" id="contact">
-          <div className="contact">
-            <h1 className="title text-uppercase">Abdelaziz's socials</h1>
-            <p className="text-black-50">Get in Touch</p>
-            <div className="contact-info-upper-container">
-              <div className="contact-info-container">
-                <img
-                  src={email}
-                  alt="Email icon"
-                  className="icon contact-icon email-icon"
-                />
-                <p><a href="mailto:abdelkhouda055@gmail.com">Gmail</a></p>
-              </div>
-              <div className="contact-info-container">
-                <img
-                  src={linkedin}
-                  alt="LinkedIn icon"
-                  className="icon contact-icon"
-                />
-                <p><a href="https://www.linkedin.com/in/abdel-khouda-502b03253/">LinkedIn</a></p>
-              </div>
-              <div className="contact-info-container">
-                <img
-                  src={twitter}
-                  alt="Twitter icon"
-                  className="icon contact-icon"
-                />
-                <p><a href="https://twitter.com/AbdelKhouda">X-Twitter</a></p>
-              </div>
-            </div>
-          </div>
-        </section>
-        {/* CONTACT SECTION  3*/}
-        <section className="contact-section" id="contact">
-          <div className="contact">
-            <h1 className="title text-uppercase">Mohammed's socials</h1>
-            <p className="text-black-50">Get in Touch</p>
-            <div className="contact-info-upper-container">
-              <div className="contact-info-container">
-                <img
-                  src={email}
-                  alt="Email icon"
-                  className="icon contact-icon email-icon"
-                />
-                <p><a href="mailto:Bouayadihamid@gmail.com">Gmail</a></p>
-              </div>
-              <div className="contact-info-container">
-                <img
-                  src={linkedin}
-                  alt="LinkedIn icon"
-                  className="icon contact-icon"
-                />
-                <p><a href="https://www.linkedin.com/in/mounim-nadir-b6575b27a">LinkedIn</a></p>
-              </div>
-              <div className="contact-info-container">
-                <img
-                  src={twitter}
-                  alt="Twitter icon"
-                  className="icon contact-icon"
-                />
-                <p><a href="https://twitter.com/AbdelKhouda">X-Twitter</a></p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* CONTACT SECTION  4*/}
-        <section className="contact-section" id="contact">
-          <div className="contact">
-            <h1 className="title text-uppercase"> Hamid's socials</h1>
-            <p className="text-black-50">Get in Touch</p>
-            <div className="contact-info-upper-container">
-              <div className="contact-info-container">
-                <img
-                  src={email}
-                  alt="Email icon"
-                  className="icon contact-icon email-icon"
-                />
-                <p><a href="mailto:Bouayadihamid@gmail.com">Gmail</a></p>
-              </div>
-              <div className="contact-info-container">
-                <img
-                  src={linkedin}
-                  alt="LinkedIn icon"
-                  className="icon contact-icon"
-                />
-                <p><a href="https://www.linkedin.com/in/hamid-bouayadi/">LinkedIn</a></p>
-              </div>
-              <div className="contact-info-container">
-                <img
-                  src={twitter}
-                  alt="Twitter icon"
-                  className="icon contact-icon"
-                />
-                <p><a href="https://x.com/HamidBouayadi">X-Twitter</a></p>
-              </div>
-            </div>
-          </div>
-        </section>
-        
-  </>
+        ))}
+      </section>
+    </>
   )
 }
 
 function Main() {
-  const [logged]=useAuth()
+  const [logged] = useAuth()
   return (
-      <div>
-      {logged?<LoggedInHome/>:<LoggedOutHome/>}
-      </div>
+    <div>
+      {logged ? <LoggedInHome /> : <LoggedOutHome />}
+    </div>
   );
 }
 
